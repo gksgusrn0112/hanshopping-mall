@@ -3,21 +3,18 @@ package com.hanshop.hanshopping_mall.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-// import org.springframework.core.annotation.Order; <-- 이거 삭제! (범인)
-// import org.springframework.data.annotation.Id;    <-- 이거 삭제!
 
 @Entity
 @Getter @Setter
 public class OrderItem {
 
-    @Id // jakarta.persistence.Id가 사용됨
-    @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_item_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
-    private Order order; // 이제 같은 패키지의 Order 엔티티를 잘 인식할 거야
+    private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_item_id")
@@ -25,4 +22,15 @@ public class OrderItem {
 
     private int orderPrice;
     private int count;
+
+    // ==생성 메서드== //
+    public static OrderItem createOrderItem(ProductItem productItem, int orderPrice, int count) {
+        OrderItem orderItem = new OrderItem();
+        orderItem.setProductItem(productItem);
+        orderItem.setOrderPrice(orderPrice);
+        orderItem.setCount(count);
+
+        productItem.removeStock(count); // 재고 감소 로직 호출
+        return orderItem;
+    }
 }
